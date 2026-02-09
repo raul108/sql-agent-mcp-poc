@@ -2,8 +2,6 @@
 
 **Natural Language to SQL Agent** with Model Context Protocol (MCP) integration for Snowflake.
 
-> **Timeline:** Feb 10-20, 2026 | **Developer:** Raul Dhruva | **Mentor:** Sravya Batte
-
 ---
 
 ## 🎯 What This Does
@@ -288,7 +286,7 @@ Auto-queries `INFORMATION_SCHEMA` on first use, then caches
 
 ## 📝 License
 
-Internal Cisco project - not for external distribution.
+MIT License - Open Source
 
 - 🤖 Natural language to SQL conversion using ChatGPT
 - 🗄️ Snowflake database integration
