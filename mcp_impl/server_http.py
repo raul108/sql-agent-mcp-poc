@@ -129,12 +129,12 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     if name == "query_database":
         query = arguments.get("query")
         session_id = arguments.get("session_id", "http_session")
-        user_role = arguments.get("user_role", "GLOBAL_ANALYST")
+        # user_role is defined in schema but not yet implemented in agent
         
         logger.info(f"Processing query: {query[:50]}... (session: {session_id})")
         
         try:
-            result = agent.run(query, session_id=session_id, user_role=user_role)
+            result = agent.run(query, session_id=session_id)
             
             # Format response
             response_text = f"Query: {query}\n\n"

@@ -28,7 +28,7 @@
 #   HTTP_AUTH_TOKEN="your-secret-token" bash scripts/run_http_server.sh
 #
 #   # Production deployment
-#   HTTP_HOST=0.0.0.0 HTTP_PORT=8000 DEBUG=false uvicorn mcp_server_http:app --workers 4
+#   HTTP_HOST=0.0.0.0 HTTP_PORT=8000 DEBUG=false uvicorn mcp_impl.server_http:app --workers 4
 
 set -e
 
@@ -108,7 +108,7 @@ echo ""
 
 # Start the server
 # Use uvicorn with the specified host and port
-exec uvicorn mcp.server_http:app \
+exec uvicorn mcp_impl.server_http:app \
     --host "$HTTP_HOST" \
     --port "$HTTP_PORT" \
     --reload \

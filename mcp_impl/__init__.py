@@ -1,19 +1,19 @@
 """
-Model Context Protocol (MCP) Integration Module
+Model Context Protocol (MCP) Implementation Module
 
 Provides both stdio (local) and HTTP (remote) transport implementations for the SQL Agent.
 
 Servers:
-  - mcp.server_stdio: Stdio-based MCP server (for VS Code integration)
-  - mcp.server_http: HTTP-based MCP server (for remote/multi-user deployments)
+  - mcp_impl.server_stdio: Stdio-based MCP server (for VS Code integration)
+  - mcp_impl.server_http: HTTP-based MCP server (for remote/multi-user deployments)
 
 Clients:
-  - mcp.client_stdio: Stdio-based MCP client
-  - mcp.client_http: HTTP-based MCP client
+  - mcp_impl.client_stdio: Stdio-based MCP client
+  - mcp_impl.client_http: HTTP-based MCP client
 
 Documentation:
-  - mcp/README.md: MCP server setup and configuration
-  - mcp/HTTP.md: HTTP transport setup and deployment
+  - mcp_impl/README.md: MCP server setup and configuration
+  - mcp_impl/HTTP.md: HTTP transport setup and deployment
 """
 
 import sys
