@@ -13,10 +13,19 @@ Usage:
     python mcp_server.py
 """
 
+# Fix sys.path if this script is run directly from mcp/ subdirectory
+import sys
+from pathlib import Path
+_script_dir = Path(__file__).parent  # mcp/
+_project_root = _script_dir.parent   # parent of mcp/
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import asyncio
 import json
 import warnings
 from typing import Any
+
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
@@ -27,6 +36,7 @@ warnings.filterwarnings("ignore", message=".*Pydantic V1.*", category=UserWarnin
 from src.config import Config
 from src.agent import SQLAgent
 from src.memory import ConversationMemory
+
 
 # Initialize agent components
 config = Config()

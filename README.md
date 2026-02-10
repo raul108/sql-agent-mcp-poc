@@ -40,24 +40,34 @@ AI-powered SQL agent that:
 ```
 LangGraph/
 ├── main.py                    # Interactive CLI interface
-├── mcp_server.py             # MCP server for VS Code integration
-├── mcp_client.py             # Interactive MCP client
-├── requirements.txt          # Python dependencies
-├── .env                      # All configuration (gitignored)
+├── requirements.txt           # Python dependencies
+├── .env                       # Configuration (gitignored)
 │
-├── src/                      # Core agent modules
-│   ├── agent.py              # 6-node LangGraph workflow
-│   ├── config.py             # Environment-based configuration
-│   ├── memory.py             # SQLite conversation storage
-│   ├── tools.py              # Snowflake integration + auto schema discovery
-│   └── validator.py          # SQL safety validator
+├── src/                       # Core agent modules
+│   ├── agent.py               # 6-node LangGraph workflow
+│   ├── config.py              # Environment-based configuration
+│   ├── memory.py              # SQLite conversation storage
+│   ├── tools.py               # Snowflake integration + auto schema discovery
+│   └── validator.py           # SQL safety validator
+│
+├── mcp/                       # Model Context Protocol implementations
+│   ├── __init__.py
+│   ├── INDEX.md               # MCP folder overview
+│   ├── README.md              # Stdio server setup guide
+│   ├── HTTP.md                # HTTP server deployment guide
+│   ├── server_stdio.py        # Stdio-based MCP server (VS Code)
+│   ├── server_http.py         # HTTP-based MCP server (remote)
+│   ├── client_stdio.py        # Stdio client for testing
+│   └── client_http.py         # HTTP client for testing
 │
 ├── docs/
-│   ├── MCP_SETUP.md          # MCP integration guide
-│   └── README.md             # Additional documentation
+│   ├── COMPLETE_WORKFLOW.md   # Full workflow documentation
+│   └── README.md              # Additional documentation
 │
 └── scripts/
-    └── run.sh                # Quick launcher
+    ├── run_stdio_server.sh    # Stdio MCP server launcher
+    ├── run_http_server.sh     # HTTP MCP server launcher
+    └── quick_test.py          # Quick connection test
 ```
 
 **Note:** Schema is auto-discovered from Snowflake INFORMATION_SCHEMA - no YAML files needed!

@@ -86,7 +86,7 @@ if [[ "$HTTP_HOST" == "127.0.0.1" || "$HTTP_HOST" == "localhost" ]]; then
     echo "✓ Local server (localhost only)"
     echo ""
     echo "To test with the HTTP client:"
-    echo "  python mcp_client_http.py --url http://localhost:$HTTP_PORT"
+    echo "  python mcp/client_http.py --url http://localhost:$HTTP_PORT"
     echo ""
 else
     echo "⚠️  Listening on $HTTP_HOST (accessible remotely)"
@@ -108,7 +108,7 @@ echo ""
 
 # Start the server
 # Use uvicorn with the specified host and port
-exec uvicorn mcp_server_http:app \
+exec uvicorn mcp.server_http:app \
     --host "$HTTP_HOST" \
     --port "$HTTP_PORT" \
     --reload \

@@ -26,10 +26,19 @@ Environment Variables:
     HTTP_AUTH_TOKEN: Optional bearer token for authentication
 """
 
+# Fix sys.path if this script is run directly from mcp/ subdirectory
+import sys
+from pathlib import Path
+_script_dir = Path(__file__).parent  # mcp/
+_project_root = _script_dir.parent   # parent of mcp/
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import asyncio
 import json
 import warnings
 from typing import Any, Optional
+
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.types import Tool, TextContent
