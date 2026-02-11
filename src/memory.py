@@ -34,14 +34,26 @@ class ConversationMemory:
         Initialize conversation memory.
         
         Args:
-            db_path: Path to SQLite database file
+            db_path: Path to SQLite database file or ":memory:" for in-memory
         """
         self.db_path = db_path
+        # For in-memory databases, keep persistent connection
+        # (each connect(":memory:") creates a separate database)
+        # Use check_same_thread=False for multi-threaded environments (LangGraph)
+        self._persistent_conn = None
+        if db_path == ":memory:":
+            self._persistent_conn = sqlite3.connect(":memory:", check_same_thread=False)
         self._init_database()
+    
+    def _get_connection(self):
+        """Get database connection (persistent for :memory:, new for file)."""
+        if self._persistent_conn is not None:
+            return self._persistent_conn
+        return sqlite3.connect(self.db_path)
     
     def _init_database(self):
         """Create tables if they don't exist."""
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute("""
@@ -57,7 +69,9 @@ class ConversationMemory:
         """)
         
         conn.commit()
-        conn.close()
+        # Only close if it's a file-based connection
+        if self._persistent_conn is None:
+            conn.close()
     
     def add_interaction(
         self,
@@ -77,7 +91,7 @@ class ConversationMemory:
             result_summary: Summary of query results
             is_successful: Whether query executed successfully
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         timestamp = datetime.now().isoformat()
@@ -89,7 +103,9 @@ class ConversationMemory:
         """, (session_id, timestamp, user_query, generated_sql, result_summary, is_successful))
         
         conn.commit()
-        conn.close()
+        # Only close if it's a file-based connection
+        if self._persistent_conn is None:
+            conn.close()
     
     def get_recent_history(
         self,
@@ -106,7 +122,7 @@ class ConversationMemory:
         Returns:
             List of conversation dictionaries (most recent first)
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
@@ -118,7 +134,9 @@ class ConversationMemory:
         """, (session_id, limit))
         
         rows = cursor.fetchall()
-        conn.close()
+        # Only close if it's a file-based connection
+        if self._persistent_conn is None:
+            conn.close()
         
         # Convert to list of dicts and reverse to chronological order
         history = [dict(row) for row in rows]
@@ -169,13 +187,15 @@ class ConversationMemory:
         Args:
             session_id: Session to clear
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute("DELETE FROM conversations WHERE session_id = ?", (session_id,))
         
         conn.commit()
-        conn.close()
+        # Only close if it's a file-based connection
+        if self._persistent_conn is None:
+            conn.close()
     
     def get_session_count(self, session_id: str) -> int:
         """
@@ -187,7 +207,7 @@ class ConversationMemory:
         Returns:
             Number of stored interactions
         """
-        conn = sqlite3.connect(self.db_path)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute(
@@ -196,6 +216,8 @@ class ConversationMemory:
         )
         
         count = cursor.fetchone()[0]
-        conn.close()
+        # Only close if it's a file-based connection
+        if self._persistent_conn is None:
+            conn.close()
         
         return count

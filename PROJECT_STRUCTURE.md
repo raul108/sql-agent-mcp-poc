@@ -27,14 +27,39 @@
   - Converts agent.messages array to display-friendly text
   - Extracts SQL and final answers
 
-### SQL Agent (`src/`)
-- **agent.py** - 6-node LangGraph workflow
-  - Scope detection (filters non-data questions)
-  - SQL generation with schema context
-  - Safety validation (blocks dangerous operations)
-  - Query execution with retry logic
-  - Result formatting for large datasets
-  - Natural language response generation
+### SQL Agent (`src/agent/`)
+
+**Modularized agent package** - Organized for maintainability and clarity.
+
+- **core.py** - Main SQLAgent class
+  - Orchestrates initialization and workflow execution
+  - Handles memory setup (in-memory by default, optional persistence)
+  - Builds and invokes the LangGraph workflow
+
+- **nodes.py** - 6 Workflow node implementations
+  - `check_scope()` - Filters non-data questions
+  - `analyze_query()` - NLU to SQL with history context
+  - `validate_sql()` - Safety validation (blocks dangerous ops)
+  - `execute_sql()` - Snowflake execution with retries
+  - `format_results()` - Handles large result sets
+  - `respond()` - Natural language response generation
+  - `AgentState` - Workflow state definition
+
+- **prompts.py** - Centralized LLM prompts
+  - `get_scope_check_prompt()` - Query relevance check
+  - `get_question_type_prompt()` - Summary vs new query
+  - `get_sql_generation_prompt()` - SQL generation
+  - `get_summary_response_prompt()` - History summaries
+  - `get_response_formatting_prompt()` - NL formatting
+
+- **graph_builder.py** - LangGraph construction
+  - Graph topology definition
+  - Node connections and flow
+  - Graph compilation
+
+- **__init__.py** - Package exports
+  - Exposes `SQLAgent` for clean imports
+  - `from src.agent import SQLAgent`
 
 - **config.py** - Environment-based configuration
   - Loads from `.env` file only
@@ -47,9 +72,12 @@
   - Schema caching for performance
 
 - **memory.py** - SQLite conversation history
-  - Stores user queries, generated SQL, results
+  - Supports both in-memory (`:memory:`) and file-based storage
+  - Persistent connection for in-memory mode (avoids threading issues)
+  - `check_same_thread=False` for multi-threaded LangGraph execution
   - Session-based isolation
   - Enables follow-up questions with context
+  - Methods: `add_interaction()`, `get_recent_history()`, `format_history_for_context()`, `clear_session()`
 
 - **validator.py** - SQL safety validation
   - Blocks DROP, DELETE, ALTER, UPDATE, INSERT
@@ -60,6 +88,8 @@
 - **.env** - Credentials and API keys (git-ignored)
   - SNOWFLAKE_* settings
   - OPENAI_API_KEY
+- **PERSIST_MEMORY** (optional env var) - Set to `true` to keep conversation history across restarts
+  - Default: `false` (in-memory, fresh session each restart)
 
 ## Data Storage
 - **conversation_history.db** - SQLite database

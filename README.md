@@ -2,6 +2,8 @@
 
 **Natural Language to SQL Agent** with Model Context Protocol (MCP) integration for Snowflake.
 
+**Status:** ✅ Production-Ready | 🔄 Actively Maintained | 📦 Fully Modularized
+
 ---
 
 ## 🎯 What This Does
@@ -16,7 +18,30 @@ AI-powered SQL agent that:
 
 ---
 
+## 📅 Recent Improvements (Feb 11, 2026)
+
+### Code Quality & Architecture
+- ✅ **Modularized Agent Package** - Organized `src/agent/` with clear separation of concerns:
+  - `core.py` - Main agent orchestration
+  - `nodes.py` - 6 workflow node implementations  
+  - `prompts.py` - Centralized LLM prompts (easy to update)
+  - `graph_builder.py` - LangGraph topology and compilation
+- ✅ **Fixed Threading Issues** - SQLite in-memory database with persistent connections for multi-threaded execution
+- ✅ **Session Management** - Fresh sessions by default, optional persistence
+
+### Features & Reliability
+- ✅ **History-Aware Queries** - Detects summary/reference questions and validates history availability
+- ✅ **Smart Error Handling** - Prevents hallucination when no conversation history exists
+- ✅ **Conversation Memory** - Both in-memory (default) and file-based persistence modes
+
+---
+
 ## ✅ Implemented Features
+
+### Session Management
+- ✅ **Fresh Sessions by Default** - In-memory SQLite database clears on restart
+- ✅ **Optional Persistence** - Set `PERSIST_MEMORY=true` to keep history across restarts
+- ✅ **Thread-Safe Memory** - Multi-threaded LangGraph execution with persistent connections
 
 ### Core Agent (6-Node Workflow)
 1. **Scope Detection** - Filters out non-data questions
@@ -44,7 +69,12 @@ LangGraph/
 ├── .env                       # Configuration (gitignored)
 │
 ├── src/                       # Core agent modules
-│   ├── agent.py               # 6-node LangGraph workflow
+│   ├── agent/                 # Agent package (modularized)
+│   │   ├── __init__.py        # Package exports
+│   │   ├── core.py            # Main SQLAgent class
+│   │   ├── nodes.py           # 6-node workflow implementations
+│   │   ├── prompts.py         # All LLM prompts (centralized)
+│   │   └── graph_builder.py   # LangGraph construction & topology
 │   ├── config.py              # Environment-based configuration
 │   ├── memory.py              # SQLite conversation storage
 │   ├── tools.py               # Snowflake integration + auto schema discovery
