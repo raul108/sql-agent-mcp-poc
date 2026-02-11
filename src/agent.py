@@ -64,17 +64,25 @@ class SQLAgent:
         - Retry logic for transient errors (max 3 attempts)
     """
     
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, memory_type: str = "memory"):
         """
         Initialize the SQL Agent.
         
         Args:
             config: Configuration object with Snowflake and OpenAI settings
+            memory_type: "memory" (in-memory, clears on restart) or "persistent" (file-based)
         """
         self.config = config
         self.sql_tool = SnowflakeSQLTool(config)
         self.validator = SQLValidator()
-        self.memory = ConversationMemory()
+        
+        # Use in-memory database by default (fresh session each restart)
+        # Set to "persistent" for file-based storage across restarts
+        if memory_type == "persistent":
+            self.memory = ConversationMemory("conversation_history.db")
+        else:
+            # In-memory database - clears on app restart
+            self.memory = ConversationMemory(":memory:")
         
         # Initialize OpenAI language model
         openai_config = config.get_openai_config()

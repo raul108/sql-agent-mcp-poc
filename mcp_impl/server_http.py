@@ -66,8 +66,12 @@ from src.memory import ConversationMemory
 # Initialize agent components
 logger.info("Initializing SQL Agent and MCP server components...")
 config = Config()
-agent = SQLAgent(config)
-memory = ConversationMemory()
+
+# Use in-memory database by default (fresh each restart)
+# Set PERSIST_MEMORY=true env var to keep history across restarts
+memory_type = "persistent" if os.getenv("PERSIST_MEMORY", "false").lower() == "true" else "memory"
+agent = SQLAgent(config, memory_type=memory_type)
+logger.info(f"Memory mode: {memory_type} (history {'persists' if memory_type == 'persistent' else 'clears on restart'})")
 
 # Create MCP server
 mcp_server = Server("sql-agent-mcp-http")
