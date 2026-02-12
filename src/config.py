@@ -8,10 +8,12 @@ Schema discovery is automatic from Snowflake INFORMATION_SCHEMA.
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from setup/.env file
+env_path = Path(__file__).parent.parent / "setup" / ".env"
+load_dotenv(env_path)
 
 
 class Config:

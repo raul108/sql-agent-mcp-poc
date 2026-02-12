@@ -55,7 +55,7 @@ class SQLAgent:
         # Use in-memory database by default (fresh session each restart)
         # Set to "persistent" for file-based storage across restarts
         if memory_type == "persistent":
-            self.memory = ConversationMemory("conversation_history.db")
+            self.memory = ConversationMemory("data/conversation_history.db")
         else:
             # In-memory database - clears on app restart
             self.memory = ConversationMemory(":memory:")

@@ -65,8 +65,16 @@ AI-powered SQL agent that:
 ```
 LangGraph/
 ├── main.py                    # Interactive CLI interface
-├── requirements.txt           # Python dependencies
-├── .env                       # Configuration (gitignored)
+├── README.md                  # This file
+├── .gitignore                 # Git ignore rules (root level)
+│
+├── setup/                     # Configuration & dependencies
+│   ├── .env                   # Credentials (gitignored)
+│   ├── requirements.txt       # Python dependencies
+│   └── SETUP.md               # Setup guide
+│
+├── data/                      # Runtime data & artifacts
+│   └── conversation_history.db # Conversation history (when PERSIST_MEMORY=true)
 │
 ├── src/                       # Core agent modules
 │   ├── agent/                 # Agent package (modularized)
@@ -80,31 +88,22 @@ LangGraph/
 │   ├── tools.py               # Snowflake integration + auto schema discovery
 │   └── validator.py           # SQL safety validator
 │
-├── mcp/                       # Model Context Protocol implementations
-│   ├── __init__.py
-│   ├── INDEX.md               # MCP folder overview
-│   ├── README.md              # Stdio server setup guide
-│   ├── HTTP.md                # HTTP server deployment guide
-│   ├── server_stdio.py        # Stdio-based MCP server (VS Code)
-│   ├── server_http.py         # HTTP-based MCP server (remote)
-│   ├── client_stdio.py        # Stdio client for testing
-│   └── client_http.py         # HTTP client for testing
+├── mcp_impl/                  # MCP HTTP Server & Flask Web UI
+│   ├── app.py                 # Flask web interface (port 8001)
+│   ├── server_http.py         # HTTP MCP server (port 8000)
+│   ├── server_manager.py      # MCP server lifecycle management
+│   └── response_formatter.py  # Response formatting for display
 │
-├── docs/
-│   ├── COMPLETE_WORKFLOW.md   # Full workflow documentation
-│   └── README.md              # Additional documentation
+├── docs/                      # Documentation
+│   ├── PROJECT_STRUCTURE.md   # Detailed codebase organization
+│   ├── test_queries.md        # Example queries to test the agent
+│   └── COMPLETE_WORKFLOW.md   # Workflow verification details
 │
 └── scripts/
-    ├── run_stdio_server.sh    # Stdio MCP server launcher
-    ├── run_http_server.sh     # HTTP MCP server launcher
-    └── quick_test.py          # Quick connection test
+    └── run.sh                 # Application launcher
 ```
 
-**Note:** Schema is auto-discovered from Snowflake INFORMATION_SCHEMA - no YAML files needed!
-
 ---
-
-## 🚀 Quick Start---
 
 ## 🚀 Quick Start
 
@@ -116,12 +115,12 @@ python3 -m venv .venv
 source .venv/bin/activate  # macOS/Linux
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -r setup/requirements.txt
 ```
 
 ### 2. Configure Credentials
 
-Create `.env` file with your credentials:
+Create `setup/.env` file with your credentials:
 ```bash
 # Snowflake
 SNOWFLAKE_ACCOUNT=your_account.region
@@ -134,25 +133,21 @@ SNOWFLAKE_ROLE=ACCOUNTADMIN
 
 # OpenAI
 OPENAI_API_KEY=sk-...
+
+# Optional: Persistent conversation history
+PERSIST_MEMORY=false  # Set to true for file-based history
 ```
 
 ### 3. Run the Agent
 
-**Interactive CLI:**
+**Web UI & MCP Server:**
 ```bash
-.venv/bin/python main.py
+.venv/bin/python mcp_impl/app.py
 ```
 
-**MCP Client (Interactive Chat):**
-```bash
-.venv/bin/python mcp_client.py
-```
-
-**MCP Server (for VS Code):**
-```bash
-.venv/bin/python mcp_server.py
-```
-See [docs/MCP_SETUP.md](docs/MCP_SETUP.md) for VS Code configuration.
+The application will start on:
+- **Web UI**: http://localhost:8001 (Chat interface)
+- **MCP Server**: http://localhost:8000 (JSON-RPC 2.0)
 
 ---
 
@@ -256,36 +251,14 @@ Generated SQL: DELETE FROM ORDERS WHERE...
 ## 📊 Testing
 
 ### Quick Test Suite
+
+**Test your connection:**
 ```bash
 .venv/bin/python scripts/quick_test.py
 ```
 
-**Tests:**
-- ✅ Module imports
-- ✅ Configuration loading
-- ✅ Snowflake connection
-- ✅ Agent query execution
-- ✅ Conversation memory
-
-### Example Test Queries
-
-**Data exploration:**
-- "How many customers are there?"
-- "What tables are available?"
-- "Show me the top 5 nations by customer count"
-
-**Follow-up questions:**
-- "What about orders?"
-- "How does ASIA compare to AMERICA?"
-- "Summarize what we discussed"
-
-**Safety tests:**
-- "Drop the customer table"
-- "Delete all orders from 2024"
-
-**Scope tests:**
-- "What's the weather today?"
-- "Tell me a joke"
+**Try sample queries:**
+See [docs/test_queries.md](docs/test_queries.md) for a list of example queries
 
 ---
 
@@ -294,18 +267,22 @@ Generated SQL: DELETE FROM ORDERS WHERE...
 ### Environment Variables (`.env`)
 Sensitive credentials - never commit to git
 
-### YAML Config (`config/config.yaml`)
-Non-sensitive metadata and settings
+### Session Management
+- **Default Mode**: In-memory SQLite (fresh sessions on restart)
+- **Persistent Mode**: Set `PERSIST_MEMORY=true` for file-based history
 
 ### Schema Discovery
-Auto-queries `INFORMATION_SCHEMA` on first use, then caches
+Auto-queries `INFORMATION_SCHEMA` on first use
 
 ---
 
 ## 📚 Documentation
 
-- [MCP_SETUP.md](docs/MCP_SETUP.md) - VS Code MCP integration guide
-- [README.md](docs/README.md) - Additional technical details
+For more details, see the [docs](docs/) folder:
+
+- [Project Structure](docs/PROJECT_STRUCTURE.md) - Detailed codebase organization
+- [Test Queries](docs/test_queries.md) - Example queries to test the agent
+- [Complete Workflow](docs/COMPLETE_WORKFLOW.md) - Workflow verification details
 
 ---
 
@@ -319,7 +296,8 @@ Auto-queries `INFORMATION_SCHEMA` on first use, then caches
 | Conversation Memory | ✅ | SQLite-based history |
 | Follow-up Questions | ✅ | Context from last 5 interactions |
 | Retry Logic | ✅ | Max 3 attempts on errors |
-| MCP Integration | ✅ | VS Code tool exposure |
+| Fresh Sessions | ✅ | In-memory database by default |
+| Persistent History | ✅ | Optional file-based storage |
 | Scope Detection | ✅ | Filters non-data questions |
 
 ---
@@ -327,34 +305,3 @@ Auto-queries `INFORMATION_SCHEMA` on first use, then caches
 ## 📝 License
 
 MIT License - Open Source
-
-- 🤖 Natural language to SQL conversion using ChatGPT
-- 🗄️ Snowflake database integration
-- 📊 Schema-aware query generation
-- 🔄 Interactive query mode
-
-## Testing
-
-**Test your connection:**
-```bash
-python scripts/test_connection.py
-```
-
-**Try sample queries:**
-See `docs/test_queries.md` for a list of example queries
-
-## Configuration
-
-### Environment Variables (.env)
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `SNOWFLAKE_*`: Snowflake connection parameters
-
-### Schema Configuration (config/config.yaml)
-Define your database schema and relationships to help the agent generate better queries.
-
-## Architecture
-
-The agent uses LangGraph to create a workflow:
-1. **Analyze Query**: Converts natural language to SQL
-2. **Execute SQL**: Runs query on Snowflake
-3. **Respond**: Formats results for the user

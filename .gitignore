@@ -18,7 +18,7 @@ dist/
 *.egg-info/
 
 # Database
-conversation_history.db
+data/*.db
 *.db
 
 # IDE
